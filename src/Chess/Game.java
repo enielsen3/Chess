@@ -102,7 +102,6 @@ class Game {
 			whiteMove = !whiteMove;
 			if(toRemove instanceof Piece) {
 				removedPieces.add(toRemove);
-				System.out.println(removedPieces);
 			}
 		}
 		else {
