@@ -59,6 +59,38 @@ class Board {
 		gameBoard[4][0] = new Square(new King(Piece.Color.BLACK));
 	}
 	
+	//Method for copying an existing board
+	public Board(Board b) {
+		Piece.Color c;
+		for(int i = 1; i <= 8; i++) {
+			for(int j = 1; j <= 8; j++) {
+				if(b.getSquare(i, j).isOccupied()) {
+					c = b.getSquare(i, j).getPiece().getColor();
+					if(b.getSquare(i, j).getPiece() instanceof Pawn) {
+						gameBoard[i-1][j-1] = new Square(new Pawn(c));
+					}
+					else if (b.getSquare(i, j).getPiece() instanceof Rook) {
+						gameBoard[i-1][j-1] = new Square(new Rook(c));
+					}
+					else if (b.getSquare(i, j).getPiece() instanceof Knight) {
+						gameBoard[i-1][j-1] = new Square(new Knight(c));
+					}
+					else if (b.getSquare(i, j).getPiece() instanceof Bishop) {
+						gameBoard[i-1][j-1] = new Square(new Bishop(c));
+					}
+					else if (b.getSquare(i, j).getPiece() instanceof Queen) {
+						gameBoard[i-1][j-1] = new Square(new Queen(c));
+					}
+					else if (b.getSquare(i, j).getPiece() instanceof King) {
+						gameBoard[i-1][j-1] = new Square(new King(c));
+					}
+				}
+				else {
+					gameBoard[i-1][j-1] = new Square();
+				}
+			}
+		}
+	}
 	public Square getSquare(int i, int j) {
 		return gameBoard[i-1][j-1];
 	}

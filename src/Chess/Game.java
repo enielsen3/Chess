@@ -10,6 +10,7 @@ import javax.swing.*;
 class Game {
 	
 	public Board board;
+	private Board bCopy;
 	private Boolean whiteMove;
 	private Boolean blackInCheck;
 	private Boolean whiteInCheck;
@@ -20,8 +21,7 @@ class Game {
 	private Piece moving;
 	private Piece toRemove;
 	private Piece inAir;
-	//private	Point2D blackKingLoc;
-	//private	Point2D whiteKingLoc;
+	
 	
 	public Game() {
 		board = new Board();
@@ -29,13 +29,13 @@ class Game {
 		blackInCheck = false;
 		whiteInCheck = false;
 		checkmate = false;
-		//blackKingLoc = new Point2D.Double(5, 1);
-		//whiteKingLoc = new Point2D.Double(5, 8);
 		removedPieces = new ArrayList<>();
 	}
 	
 	public void moveLogic(Point2D from, Point2D to) {
-		//change points to "simple" points --> (1,1) to (8,8)
+		//create a copy of the current board state
+		Board bCopy = new Board(board);
+		
 		legalMove = true;
 		capture = false;
 		Point2D fromS = simplePoint(from);
@@ -44,9 +44,9 @@ class Game {
 		toRemove = null;
 		
 				
-		// check that the original click was on a piece, if it was --> set moving = piece; otherwise return false
+		// check that the original click was on a piece, if it was --> set moving = piece; otherwise return
 		if(!board.getSquare((int) fromS.getX(), (int) fromS.getY()).isOccupied()) {
-			legalMove = false;
+			return;
 		}
 		else {
 			moving = board.getSquare((int) fromS.getX(), (int) fromS.getY()).getPiece();
@@ -58,7 +58,7 @@ class Game {
 			
 			//check that a player isn't capturing their own piece
 			if(moving.getColor() == board.getSquare((int) toS.getX(), (int) toS.getY()).getPiece().getColor()) {
-				legalMove = false;
+				return;
 			}
 			else {
 				toRemove = board.getSquare((int) toS.getX(), (int) toS.getY()).getPiece();
@@ -69,37 +69,63 @@ class Game {
 		
 		//check the move logic for the specific piece -- see individual piece classes for methods
 		if(!moving.isValidMove(fromS.getX(), fromS.getY(), toS.getX(), toS.getY(), capture)) {
-			legalMove = false;
+			return;
 		}
 		
 		//turn check
 		if(whiteMove != (moving.getColor() == Piece.Color.WHITE)) {
-			legalMove = false;
+			return;
 		}
 		
 		//collision logic check for all pieces except for knight
-		if(!(moving instanceof Knight) && piecesInBetween(fromS, toS)) {
-			legalMove = false;
+		if(!(moving instanceof Knight) && piecesInBetween(board, fromS, toS)) {
+			return;
 		}
 		
-		//completes the move in a temporary board, checks for illegal check state
+		//completes the move in a temporary board
+		bCopy.getSquare((int) toS.getX(), (int) toS.getY()).setPiece(moving);
+		bCopy.getSquare((int) fromS.getX(), (int) fromS.getY()).clearPiece();
 		
+		//check that resulting board state is legal (not moving into check)
+		if((whiteMove && checkDetection(bCopy) == Piece.Color.WHITE) || (!whiteMove && checkDetection(bCopy) == Piece.Color.BLACK)) {
+			return;
+		}
+		
+		//if white was in check, must move out of check
+		if(whiteInCheck) {
+			if(checkDetection(bCopy) == Piece.Color.WHITE) {
+				return;
+			}
+		}
+		
+		// if black was in check, must move out of check
+		if(blackInCheck) {
+			if(checkDetection(bCopy) == Piece.Color.BLACK) {
+				return;
+			}
+			
+		}
 		
 		//if passed all move logic checks, complete the move, put the removed piece in removedPieces 
 		if(legalMove) {
 			board.getSquare((int) toS.getX(), (int) toS.getY()).setPiece(moving);
 			board.getSquare((int) fromS.getX(), (int) fromS.getY()).clearPiece();
-			//update location of King if needed
-		/*	if (moving instanceof King) {
-				if(whiteMove) {
-					whiteKingLoc = toS;
-				}
-				else {
-					blackKingLoc = toS;
-				}
-			} */
+			
+			//check if move created check state
+			if(checkDetection(board) == Piece.Color.WHITE) {
+				whiteInCheck = true;
+			}
+			else if (checkDetection(board) == Piece.Color.BLACK) {
+				blackInCheck = true;
+			}
+			else {
+				whiteInCheck = false;
+				blackInCheck = false;
+			}
+			
 			//change turns
 			whiteMove = !whiteMove;
+			//System.out.println(checkDetection(board));
 			if(toRemove instanceof Piece) {
 				removedPieces.add(toRemove);
 			}
@@ -109,13 +135,13 @@ class Game {
 		}
 	}
 	
-	public Boolean[] checkDetection(Board b) {
+	public Piece.Color checkDetection(Board b) {
 		
 		Point2D currentPt;
 		Piece currentPiece;
 		Point2D blackKingLoc = null;
 		Point2D whiteKingLoc = null;
-		Boolean[] result = new Boolean[2];
+		
 		
 		//find kings on temp board b
 		for(int i = 1; i <= 8; i++) {
@@ -142,15 +168,21 @@ class Game {
 					currentPiece = b.getSquare((int) currentPt.getX(), (int) currentPt.getY()).getPiece();
 					if(currentPiece.color == Piece.Color.WHITE) {
 						if(currentPiece.isValidMove(currentPt.getX(), currentPt.getY(), blackKingLoc.getX(), blackKingLoc.getY(), true)) {
-							if(!(currentPiece instanceof Knight) && piecesInBetween(currentPt, blackKingLoc)) {
-								blackInCheck = true;
+							if(!(currentPiece instanceof Knight) && !piecesInBetween(b, currentPt, blackKingLoc)) {
+								return Piece.Color.BLACK;
+							}
+							else if (currentPiece instanceof Knight) {
+								return Piece.Color.BLACK;
 							}
 						}
 					}
 					if(currentPiece.color == Piece.Color.BLACK) {
 						if(currentPiece.isValidMove(currentPt.getX(), currentPt.getY(), whiteKingLoc.getX(), whiteKingLoc.getY(), true)) {
-							if(!(currentPiece instanceof Knight) && piecesInBetween(currentPt, whiteKingLoc)) {
-								whiteInCheck = true;
+							if(!(currentPiece instanceof Knight) && !piecesInBetween(b, currentPt, whiteKingLoc)) {
+								return Piece.Color.WHITE;
+							}
+							else if (currentPiece instanceof Knight) {
+								return Piece.Color.WHITE;
 							}
 						}
 					}
@@ -159,10 +191,10 @@ class Game {
 			}
 		}
 		
-		return result;
+		return null;
 			
 	}
-	public Boolean piecesInBetween(Point2D fromS, Point2D toS) {
+	public Boolean piecesInBetween(Board b, Point2D fromS, Point2D toS) {
 		
 		double x = toS.getX() - fromS.getX();
 		double y = toS.getY() - fromS.getY();
@@ -170,7 +202,7 @@ class Game {
 		//if vertical move
 		if(x == 0) {
 			for(int i = 1; i < Math.abs(y); i++) {
-				if(board.getSquare((int) fromS.getX(), (int) fromS.getY() + Integer.signum((int) y)*i).isOccupied()) {
+				if(b.getSquare((int) fromS.getX(), (int) fromS.getY() + Integer.signum((int) y)*i).isOccupied()) {
 					return true;
 				}
 			}
@@ -179,7 +211,7 @@ class Game {
 		//if horizontal move 
 		else if(y == 0) {
 			for(int i = 1; i < Math.abs(x); i++) {
-				if(board.getSquare((int) fromS.getX() + Integer.signum((int) x)*i, (int) fromS.getY()).isOccupied()) {
+				if(b.getSquare((int) fromS.getX() + Integer.signum((int) x)*i, (int) fromS.getY()).isOccupied()) {
 					return true;
 				}
 			}
@@ -188,7 +220,7 @@ class Game {
 		//if diagonal move
 		else {
 			for(int i = 1; i < Math.abs(x); i++) {
-				if(board.getSquare((int) fromS.getX() + Integer.signum((int) x)*i, (int) fromS.getY() + Integer.signum((int) y)*i).isOccupied()) {
+				if(b.getSquare((int) fromS.getX() + Integer.signum((int) x)*i, (int) fromS.getY() + Integer.signum((int) y)*i).isOccupied()) {
 					return true;
 				}
 			}
