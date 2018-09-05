@@ -7,10 +7,10 @@ class Rook extends Piece {
 	public Rook(Color color) {
 		super.color = color;
 		if(color == Color.WHITE) { 
-			super.img = new ImageIcon("RookWhite.png"); 
+			super.img = new ImageIcon("images/RookWhite.png"); 
 		}
 		else { 
-			super.img = new ImageIcon("RookBlack.png"); 
+			super.img = new ImageIcon("images/RookBlack.png"); 
 		}
 	}
 

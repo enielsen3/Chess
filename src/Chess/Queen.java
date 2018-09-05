@@ -7,10 +7,10 @@ class Queen extends Piece {
 	public Queen(Color color) {
 		super.color = color;
 		if(color == Color.WHITE) { 
-			super.img = new ImageIcon("QueenWhite.png"); 
+			super.img = new ImageIcon("images/QueenWhite.png"); 
 		}
 		else { 
-			super.img = new ImageIcon("QueenBlack.png"); 
+			super.img = new ImageIcon("images/QueenBlack.png"); 
 		}
 		
 	}

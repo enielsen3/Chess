@@ -7,10 +7,10 @@ class Bishop extends Piece {
 	public Bishop(Color color) {
 		super.color = color;
 		if(color == Color.WHITE) { 
-			super.img = new ImageIcon("BishopWhite.png"); 
+			super.img = new ImageIcon("images/BishopWhite.png"); 
 		}
 		else { 
-			super.img = new ImageIcon("BishopBlack.png"); 
+			super.img = new ImageIcon("images/BishopBlack.png"); 
 		}
 	}
 

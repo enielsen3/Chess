@@ -7,10 +7,10 @@ class Knight extends Piece {
 	public Knight(Color color) {
 		super.color = color;
 		if(color == Color.WHITE) { 
-			super.img = new ImageIcon("KnightWhite.png"); 
+			super.img = new ImageIcon("images/KnightWhite.png"); 
 		}
 		else { 
-			super.img = new ImageIcon("KnightBlack.png"); 
+			super.img = new ImageIcon("images/KnightBlack.png"); 
 		}
 	}
 

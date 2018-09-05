@@ -7,10 +7,10 @@ class King extends Piece {
 	public King(Color color) {
 		super.color = color;
 		if(color == Color.WHITE) { 
-			super.img = new ImageIcon("KingWhite.png"); 
+			super.img = new ImageIcon("images/KingWhite.png"); 
 		}
 		else { 
-			super.img = new ImageIcon("KingBlack.png"); 
+			super.img = new ImageIcon("images/KingBlack.png"); 
 		}
 		
 	}

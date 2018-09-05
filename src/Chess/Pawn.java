@@ -7,10 +7,10 @@ class Pawn extends Piece {
 	public Pawn(Color color) {
 		super.color = color;
 		if(color == Color.WHITE) { 
-			super.img = new ImageIcon("PawnWhite.png"); 
+			super.img = new ImageIcon("images/PawnWhite.png"); 
 		}
 		else { 
-			super.img = new ImageIcon("PawnBlack.png"); 
+			super.img = new ImageIcon("images/PawnBlack.png"); 
 		}
 	}
 
