@@ -83,7 +83,7 @@ class DrawBoard extends JComponent {
 	   public void mouseReleased(MouseEvent release) {
 		   newPoint = release.getPoint();
 		   if(newPoint.getX() <= 800 && newPoint.getY() <= 800) {
-			   game.moveLogic(point, newPoint);
+			   game.move(point, newPoint);
 			   repaint();
 		   }
 		   

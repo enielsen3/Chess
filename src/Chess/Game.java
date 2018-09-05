@@ -32,14 +32,14 @@ class Game {
 		removedPieces = new ArrayList<>();
 	}
 	
-	public void moveLogic(Point2D from, Point2D to) {
+	public void move(Point2D from, Point2D to) {
 		//create a copy of the current board state
 		Board bCopy = new Board(board);
 		
 		legalMove = true;
 		capture = false;
-		Point2D fromS = simplePoint(from);
-		Point2D toS = simplePoint(to);
+		Point2D fromS = getXY(from);
+		Point2D toS = getXY(to);
 		moving = null;
 		toRemove = null;
 		
@@ -78,7 +78,7 @@ class Game {
 		}
 		
 		//collision logic check for all pieces except for knight
-		if(!(moving instanceof Knight) && piecesInBetween(board, fromS, toS)) {
+		if(!(moving instanceof Knight) && isBlocked(board, fromS, toS)) {
 			return;
 		}
 		
@@ -87,23 +87,23 @@ class Game {
 		bCopy.getSquare((int) fromS.getX(), (int) fromS.getY()).clearPiece();
 		
 		//check that resulting board state is legal (not moving into check)
-		if((whiteMove && checkDetection(bCopy) == Piece.Color.WHITE) || (!whiteMove && checkDetection(bCopy) == Piece.Color.BLACK)) {
+		if((whiteMove && detectCheck(bCopy) == Piece.Color.WHITE) || (!whiteMove && detectCheck(bCopy) == Piece.Color.BLACK)) {
 			return;
 		}
 		
 		//if white was in check, must move out of check
 		if(whiteInCheck) {
-			if(checkDetection(bCopy) == Piece.Color.WHITE) {
+			if(detectCheck(bCopy) == Piece.Color.WHITE) {
 				return;
 			}
 		}
 		
 		// if black was in check, must move out of check
 		if(blackInCheck) {
-			if(checkDetection(bCopy) == Piece.Color.BLACK) {
+			if(detectCheck(bCopy) == Piece.Color.BLACK) {
 				return;
 			}
-			
+		
 		}
 		
 		//if passed all move logic checks, complete the move, put the removed piece in removedPieces 
@@ -112,11 +112,17 @@ class Game {
 			board.getSquare((int) fromS.getX(), (int) fromS.getY()).clearPiece();
 			
 			//check if move created check state
-			if(checkDetection(board) == Piece.Color.WHITE) {
+			if(detectCheck(board) == Piece.Color.WHITE) {
 				whiteInCheck = true;
+				if(isCheckMate()) {
+					//endOfGame();
+				}
 			}
-			else if (checkDetection(board) == Piece.Color.BLACK) {
+			else if (detectCheck(board) == Piece.Color.BLACK) {
 				blackInCheck = true;
+				if(isCheckMate()) {
+					//endOfGame();
+				}
 			}
 			else {
 				whiteInCheck = false;
@@ -135,7 +141,7 @@ class Game {
 		}
 	}
 	
-	public Piece.Color checkDetection(Board b) {
+	public Piece.Color detectCheck(Board b) {
 		
 		Point2D currentPt;
 		Piece currentPiece;
@@ -168,7 +174,7 @@ class Game {
 					currentPiece = b.getSquare((int) currentPt.getX(), (int) currentPt.getY()).getPiece();
 					if(currentPiece.color == Piece.Color.WHITE) {
 						if(currentPiece.isValidMove(currentPt.getX(), currentPt.getY(), blackKingLoc.getX(), blackKingLoc.getY(), true)) {
-							if(!(currentPiece instanceof Knight) && !piecesInBetween(b, currentPt, blackKingLoc)) {
+							if(!(currentPiece instanceof Knight) && !isBlocked(b, currentPt, blackKingLoc)) {
 								return Piece.Color.BLACK;
 							}
 							else if (currentPiece instanceof Knight) {
@@ -178,7 +184,7 @@ class Game {
 					}
 					if(currentPiece.color == Piece.Color.BLACK) {
 						if(currentPiece.isValidMove(currentPt.getX(), currentPt.getY(), whiteKingLoc.getX(), whiteKingLoc.getY(), true)) {
-							if(!(currentPiece instanceof Knight) && !piecesInBetween(b, currentPt, whiteKingLoc)) {
+							if(!(currentPiece instanceof Knight) && !isBlocked(b, currentPt, whiteKingLoc)) {
 								return Piece.Color.WHITE;
 							}
 							else if (currentPiece instanceof Knight) {
@@ -194,7 +200,12 @@ class Game {
 		return null;
 			
 	}
-	public Boolean piecesInBetween(Board b, Point2D fromS, Point2D toS) {
+	
+	public Boolean isCheckMate() {
+		return false;
+	}
+	
+	public Boolean isBlocked(Board b, Point2D fromS, Point2D toS) {
 		
 		double x = toS.getX() - fromS.getX();
 		double y = toS.getY() - fromS.getY();
@@ -228,9 +239,10 @@ class Game {
 		
 		return false;
 	}
-	
+	/*
+	//unused at the moment, might use for piece in air
 	public Boolean eligibleToMove(Point2D from) {
-		Point2D fromS = simplePoint(from);
+		Point2D fromS = getXY(from);
 		inAir = null;
 		
 		// check that the original click was on a piece, if it was --> set moving = piece; otherwise return false
@@ -248,19 +260,21 @@ class Game {
 		return true;
 	}
 	
+	
+	//unused at the moment, might use for piece in air
 	//used to "Pick up" a piece from the board and drag it with mouse
 	public Piece pickUpPiece(Point2D from) {
-		Point2D fromS = simplePoint(from);
+		Point2D fromS = getXY(from);
 		board.getSquare((int) fromS.getX(), (int) fromS.getY()).clearPiece();
 		return inAir;
 	}
-	
-	private Point2D simplePoint(Point2D pixels) {
+	*/
+	private Point2D getXY(Point2D pixels) {
 		//takes input of 2D point of pixels --> (356, 478)
 		//changes point to "simple" point --> (4,5)
-		Point2D simple = new Point2D.Double();
-		simple.setLocation(Math.ceil(pixels.getX() / 100), Math.ceil(pixels.getY() / 100));
-		return simple;
+		Point2D xy = new Point2D.Double();
+		xy.setLocation(Math.ceil(pixels.getX() / 100), Math.ceil(pixels.getY() / 100));
+		return xy;
 	}
 	
 	public static void main(String[] args) {
