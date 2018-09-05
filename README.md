@@ -12,3 +12,7 @@ Add:
 - [ ] removed pieces on the side of the board
 - [ ] turn indicator
 - [ ] undo turn
+
+##Screenshot
+
+![Image of Chess](https://github.com/enielsen3/Chess/blob/master/images/chess.PNG)
