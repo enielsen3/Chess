@@ -13,6 +13,6 @@ Add:
 - [ ] turn indicator
 - [ ] undo turn
 
-##Screenshot
+## Screenshot
 
 ![Image of Chess](https://github.com/enielsen3/Chess/blob/master/images/chess.PNG)
